@@ -40,10 +40,10 @@ const specialties = [
 ];
 
 const hospitals = [
-  { name: "City General Hospital", rating: 4.5, location: "Downtown", phone: "+1 555-0100" },
-  { name: "St. Mary Medical Center", rating: 4.8, location: "Uptown", phone: "+1 555-0200" },
-  { name: "University Health Clinic", rating: 4.3, location: "University District", phone: "+1 555-0300" },
-  { name: "Community Care Hospital", rating: 4.6, location: "Suburb", phone: "+1 555-0400" },
+  { name: "SIMS Hospitals", rating: 4.7, location: "Vadapalani", phone: "044 2000 2001" },
+  { name: "Apollo Hospital Greams Lane", rating: 4.8, location: "Thousand Lights", phone: "080 6904 9756" },
+  { name: "MGM Healthcare", rating: 4.6, location: "Raja Annamalaipuram", phone: "044 4524 2407" },
+  { name: "Dr.Kamakshi Memorial Hospital", rating: 4.4, location: "Pallikaranai", phone: "044 6630 0300" },
 ];
 
 const doctors = [

@@ -19,10 +19,10 @@ import {
 import { toast } from "sonner";
 
 const emergencyNumbers = [
-  { name: "Emergency Services", number: "911", icon: AlertTriangle, color: "bg-red-500" },
-  { name: "Ambulance", number: "102", icon: Ambulance, color: "bg-orange-500" },
-  { name: "Poison Control", number: "1-800-222-1222", icon: AlertCircle, color: "bg-sky-600" },
-  { name: "Hospital Helpline", number: "108", icon: Hospital, color: "bg-blue-500" },
+  { name: "Emergency Services", number: "112", icon: AlertTriangle, color: "bg-red-500" },
+  { name: "Ambulance", number: "108", icon: Ambulance, color: "bg-orange-500" },
+  { name: "Poison Control", number: "1800-425-1213", icon: AlertCircle, color: "bg-sky-600" },
+  { name: "Hospital Helpline", number: "104", icon: Hospital, color: "bg-blue-500" },
 ];
 
 const Emergency: React.FC = () => {
