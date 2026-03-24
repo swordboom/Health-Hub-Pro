@@ -26,7 +26,7 @@ function spawnProcess(command, args) {
   const child = spawn(command, args, {
     cwd: process.cwd(),
     stdio: "inherit",
-    shell: false,
+    shell: true,
   });
 
   child.on("exit", (code) => {
