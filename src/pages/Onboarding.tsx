@@ -306,7 +306,7 @@ const Onboarding: React.FC = () => {
                     <Input
                       id="emergencyPhone"
                       type="tel"
-                      placeholder="+1 (555) 000-0000"
+                      placeholder="+91 XXXXX-XXXXX"
                       className="pl-10"
                       value={formData.emergencyContactPhone}
                       onChange={(event) => updateFormData("emergencyContactPhone", event.target.value)}
