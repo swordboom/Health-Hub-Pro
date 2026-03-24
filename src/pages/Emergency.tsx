@@ -99,7 +99,7 @@ const Emergency: React.FC = () => {
           <CardContent className="p-6">
             <Button variant="emergency" size="xl" className="w-full text-lg" onClick={() => handleCall("911")}>
               <Phone className="h-6 w-6 mr-3 animate-pulse" />
-              Call Emergency (911)
+              Call Emergency (112)
             </Button>
             <p className="text-center text-sm text-muted-foreground mt-4">
               Tap the button above to immediately dial emergency services
@@ -241,7 +241,7 @@ const Emergency: React.FC = () => {
                   <li>Face drooping</li>
                   <li>Arm weakness</li>
                   <li>Speech difficulty</li>
-                  <li>Time to call 911</li>
+                  <li>Time to call 112</li>
                 </ul>
               </div>
               <div className="p-4 rounded-lg bg-secondary/50">
