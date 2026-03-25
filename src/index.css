@@ -9,7 +9,7 @@
     /* Primary - Calming Teal */
     --primary: 174 72% 40%;
     --primary-foreground: 0 0% 100%;
-    
+
     /* Background */
     --background: 180 20% 98%;
     --foreground: 200 25% 15%;
@@ -126,6 +126,7 @@
 }
 
 @layer components {
+
   /* Card Styles */
   .health-card {
     @apply bg-card rounded-xl border border-border p-6;
@@ -202,16 +203,25 @@
 
   /* Pulse Animation for Emergency */
   .pulse-emergency {
-    animation: pulse-emergency 2s ease-in-out infinite;
+    animation: glow 2.5s ease-in-out infinite;
+    transition: transform 0.2s ease-in-out;
   }
 
-  @keyframes pulse-emergency {
-    0%, 100% {
-      box-shadow: 0 0 0 0 hsl(0 84% 60% / 0.4);
+  @keyframes glow {
+
+    0%,
+    100% {
+      box-shadow: 0 0 8px hsl(0 84% 60% / 0.4);
     }
+
     50% {
-      box-shadow: 0 0 0 12px hsl(0 84% 60% / 0);
+      box-shadow: 0 0 16px hsl(0 84% 60% / 0.6);
     }
+  }
+
+  /* Click effect */
+  .pulse-emergency:active {
+    transform: scale(0.96);
   }
 
   /* Fade In Animation */
@@ -224,6 +234,7 @@
       opacity: 0;
       transform: translateY(10px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -240,6 +251,7 @@
       opacity: 0;
       transform: translateX(-20px);
     }
+
     to {
       opacity: 1;
       transform: translateX(0);
