@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import express from "express";
 import { ensureDatabase, readDatabase, updateDatabase } from "./lib/database.js";
-import { analyzeSideEffects, analyzeSymptoms } from "./lib/symptomEngine.js";
+import { analyzeSideEffectsWithGrok, analyzeSymptomsWithGrok } from "./lib/grok.js";
 import { createAuthToken, hashPassword, requireAuth, toPublicUser, verifyPassword } from "./lib/auth.js";
 
 const app = express();
@@ -424,7 +424,7 @@ app.post(
       throw new HttpError(400, "Please select at least one symptom.");
     }
 
-    const result = analyzeSymptoms(symptoms);
+    const result = await analyzeSymptomsWithGrok(symptoms);
 
     await updateDatabase((database) => {
       database.symptomChecks.push({
@@ -452,7 +452,8 @@ app.post(
       throw new HttpError(400, "Please enter a medicine name.");
     }
 
-    response.json(analyzeSideEffects(medicineName));
+    const result = await analyzeSideEffectsWithGrok(medicineName);
+    response.json(result);
   }),
 );
 
