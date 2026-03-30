@@ -1,74 +1,93 @@
 # Health Hub Pro
 
-Health Hub Pro is a full-stack healthcare dashboard built with React, Vite, Tailwind CSS, and Express.js. It helps users manage their health profile, book appointments, track medicine reminders, schedule tests, review emergency details, and use a guided symptom and medicine side-effect checker.
+Health Hub Pro is a full-stack health management app with a React + Vite frontend and an Express backend.
+It supports account auth, health profile onboarding, appointment and reminder tracking, emergency info access, and AI-assisted symptom and side-effect guidance via Groq.
 
-This version uses a custom Node.js + Express backend with local file-based persistence and does not depend on Supabase.
+## What Is Implemented
 
-## Features
-
-- User signup and login with token-based authentication
-- Multi-step health profile onboarding
-- Personal dashboard with BMI, profile summary, upcoming appointments, reminders, and test schedules
-- Appointment booking and healthcare management tools
-- Medicine reminder tracking
-- Test scheduling
-- Emergency card with allergies, chronic conditions, and emergency contact details
-- Groq-powered symptom analysis and medicine side-effect lookup
-- Responsive UI built with React, shadcn/ui, and Tailwind CSS
+- Email/password signup and login with signed bearer tokens
+- Protected dashboard routes (`/dashboard`, `/connect`, `/symptoms`, `/emergency`, `/onboarding`)
+- Multi-step health profile onboarding and updates
+- Appointment creation and listing
+- Medicine reminder creation and listing
+- Test schedule creation and listing
+- Emergency card view based on saved profile data
+- Symptom analysis and medicine side-effect checks using Groq
+- Local JSON persistence for all backend data
 
 ## Tech Stack
 
 - Frontend: React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui
-- Backend: Node.js, Express.js
-- AI Inference: Groq API (server-side via SDK client)
-- Authentication: Custom signed token flow
-- Persistence: Local JSON file database
+- Backend: Node.js, Express 5
+- AI: `groq-sdk`
+- Auth: Custom HMAC-signed token flow
+- Storage: File-based JSON database (`server/data/db.json`)
 - Testing: Vitest
 
-## Project Structure
+## Current Project Structure
 
 ```text
-health-hub-pro/
+Health-Hub-Pro/
 |-- public/
 |-- scripts/
 |   `-- dev.mjs
 |-- server/
-|   |-- data/
-|   |-- lib/
-|   |   |-- auth.js
-|   |   |-- database.js
-|   |   |-- groq.js
-|   |   `-- symptomEngine.js
-|   `-- index.js
+|   |-- index.js
+|   `-- lib/
+|       |-- auth.js
+|       |-- database.js
+|       |-- groq.js
+|       `-- symptomEngine.js
 |-- src/
 |   |-- components/
 |   |-- contexts/
+|   |-- hooks/
 |   |-- lib/
 |   |   `-- api.ts
-|   `-- pages/
-|-- .env
+|   |-- pages/
+|   |   |-- Index.tsx
+|   |   |-- Auth.tsx
+|   |   |-- Onboarding.tsx
+|   |   |-- Dashboard.tsx
+|   |   |-- Connect.tsx
+|   |   |-- Symptoms.tsx
+|   |   |-- Emergency.tsx
+|   |   `-- NotFound.tsx
+|   `-- App.tsx
 |-- .env.example
 |-- package.json
 |-- vite.config.ts
 `-- README.md
 ```
 
-## Getting Started
+## Prerequisites
 
-### Prerequisites
-
-- Node.js 20 or newer
+- Node.js 20+
 - npm
 
-### Installation
+## Setup
+
+1. Install dependencies:
 
 ```bash
 npm install
 ```
 
-### Environment Variables
+2. Copy environment file:
 
-Copy `.env.example` to `.env` and update the values if needed:
+```bash
+cp .env.example .env
+```
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+3. Update `.env` values, especially `JWT_SECRET` and `GROQ_API_KEY`.
+
+## Environment Variables
 
 ```env
 PORT=3001
@@ -79,69 +98,65 @@ GROQ_API_KEY=your-groq-api-key
 GROQ_MODEL=openai/gpt-oss-120b
 ```
 
-Notes:
+### Variable Details
 
-- `JWT_SECRET` is required and must be a strong random value (minimum 32 characters). The server will refuse to start if it is missing, too short, or left as the placeholder.
-- `DATA_FILE` is the local JSON database path used by the backend.
-- `VITE_API_BASE_URL=/api` works with the Vite proxy during development.
-- `GROQ_API_KEY` is required for the symptom analysis and side-effect endpoints.
-- `GROQ_MODEL` is optional and defaults to `openai/gpt-oss-120b`.
-- For compatibility, the server also accepts legacy `GROK_API_KEY` / `GROK_MODEL` names if present.
+- `PORT`: Express API port. Default `3001`.
+- `JWT_SECRET`: Required. Must be a strong random secret, at least 32 chars. The server exits if this is missing/weak/placeholder.
+- `DATA_FILE`: JSON database path for backend persistence.
+- `VITE_API_BASE_URL`: Frontend API base URL. `/api` works with local Vite proxy.
+- `GROQ_API_KEY`: Required for symptom and side-effect endpoints.
+- `GROQ_MODEL`: Optional model name, defaults to `openai/gpt-oss-120b`.
 
-## Collaborator Setup
+Compatibility note:
+- Backend also accepts legacy `GROK_API_KEY` and `GROK_MODEL` if present.
 
-For a teammate joining the project:
+## Run
 
-1. Clone the repository
-2. Run `npm install`
-3. Copy `.env.example` to `.env`
-4. Run `npm run dev`
-5. Start building in `src/` for frontend work or `server/` for backend work
-
-Notes:
-
-- `server/data/db.json` is created automatically on first run and should stay local
-- `.env` should not be committed
-- `package-lock.json` should be committed so everyone uses the same dependency tree
-
-## Running the App
-
-Start both the frontend and backend together:
+Start frontend and backend together:
 
 ```bash
 npm run dev
 ```
 
-This starts:
+Starts:
+- Frontend: `http://localhost:8080`
+- Backend: `http://localhost:3001`
 
-- Vite frontend on `http://localhost:8080`
-- Express backend on `http://localhost:3001`
-
-You can also run them separately:
+Run services separately:
 
 ```bash
 npm run dev:client
 npm run dev:server
 ```
 
-## Available Scripts
+Production backend start:
 
-- `npm run dev` - Starts frontend and backend in development mode
-- `npm run dev:client` - Starts the Vite frontend only
-- `npm run dev:server` - Starts the Express backend only
-- `npm run build` - Builds the frontend for production
-- `npm run preview` - Previews the production frontend build
-- `npm run start` - Starts the Express server in production mode
-- `npm run test` - Runs the Vitest test suite
-- `npm run test:watch` - Runs tests in watch mode
-- `npm run lint` - Runs ESLint
+```bash
+npm run build
+npm run start
+```
 
-## API Overview
+## Scripts
 
-Main backend routes:
+- `npm run dev`: Runs backend and frontend together (`scripts/dev.mjs`)
+- `npm run dev:client`: Runs Vite dev server
+- `npm run dev:server`: Runs Express server with `--watch`
+- `npm run build`: Builds frontend to `dist/`
+- `npm run build:dev`: Dev-mode Vite build
+- `npm run preview`: Preview built frontend
+- `npm run start`: Start backend using `.env`
+- `npm run lint`: Run ESLint
+- `npm run test`: Run Vitest tests
+- `npm run test:watch`: Run Vitest in watch mode
 
+## API Routes
+
+Public:
+- `GET /api/health`
 - `POST /api/auth/signup`
 - `POST /api/auth/login`
+
+Protected (require `Authorization: Bearer <token>`):
 - `GET /api/auth/me`
 - `GET /api/profile`
 - `POST /api/profile`
@@ -155,37 +170,42 @@ Main backend routes:
 - `POST /api/symptoms/analyze`
 - `POST /api/symptoms/side-effects`
 
+## Frontend Routing
+
+- `/`: Landing page
+- `/auth`: Sign in / sign up
+- `/onboarding`: Profile setup (protected)
+- `/dashboard`: Main health dashboard (protected)
+- `/connect`: Doctors, hospitals, appointments, reminders, tests (protected)
+- `/symptoms`: Symptom and side-effect tools (protected)
+- `/emergency`: Emergency panel and emergency card (protected)
+
 ## Data Storage
 
-The backend stores application data in a local JSON file defined by `DATA_FILE`. On first run, the file is created automatically.
+Backend data is stored in a JSON document at `DATA_FILE` (default `server/data/db.json`).
+The database is auto-created on first startup and includes:
 
-Important:
+- `users`
+- `healthProfiles`
+- `appointments`
+- `medicineReminders`
+- `testSchedules`
+- `symptomChecks`
 
-- Do not commit real user or health data to GitHub
-- Add backups or replace the JSON store with MongoDB/PostgreSQL before production use
+`server/data/db.json` is gitignored by default.
 
-## Production Notes
+## Notes for Contributors
 
-- The Express server can serve the built frontend from the `dist/` folder
-- Run `npm run build` before deploying
-- Use a strong `JWT_SECRET`
-- Move from file-based storage to a real database for multi-user production workloads
+- This project does not use Supabase.
+- Keep `.env` local and never commit real secrets.
+- Keep `package-lock.json` committed when dependencies change.
+- `server/lib/symptomEngine.js` exists as local rule-based logic but current API flow uses `server/lib/groq.js`.
 
-## Verification
+## Testing and Verification
 
-The current project setup has been verified with:
-
-- `npm run build`
-- `npm run test`
-
-## Future Improvements
-
-- Replace JSON persistence with MongoDB or PostgreSQL
-- Add role-based access and admin tooling
-- Add audit logs and better health record history
-- Add Docker support and CI workflows
-- Add stronger validation and API rate limiting
+- `npm run test` runs Vitest (currently includes a basic example test scaffold).
+- `npm run build` verifies frontend production build output.
 
 ## License
 
-This project is available for personal and educational use. Add a license file if you want to open-source it publicly on GitHub.
+MIT. See `LICENSE`.
