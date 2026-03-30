@@ -329,10 +329,15 @@ function getSnoozeStorageKey(userId: string) {
   return `${STORAGE_PREFIX}.snooze.${userId}`;
 }
 
+function getClearedStorageKey(userId: string) {
+  return `${STORAGE_PREFIX}.cleared.${userId}`;
+}
+
 export function useNotifications(userId: string | null): UseNotificationsResult {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
   const [snoozedUntilById, setSnoozedUntilById] = useState<Record<string, string>>({});
+  const [clearedIds, setClearedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -340,13 +345,16 @@ export function useNotifications(userId: string | null): UseNotificationsResult 
     if (!userId) {
       setReadIds(new Set());
       setSnoozedUntilById({});
+      setClearedIds(new Set());
       return;
     }
 
     const nextReadIds = new Set(parseJson<string[]>(window.localStorage.getItem(getReadStorageKey(userId)), []));
     const nextSnoozedById = parseJson<Record<string, string>>(window.localStorage.getItem(getSnoozeStorageKey(userId)), {});
+    const nextClearedIds = new Set(parseJson<string[]>(window.localStorage.getItem(getClearedStorageKey(userId)), []));
     setReadIds(nextReadIds);
     setSnoozedUntilById(nextSnoozedById);
+    setClearedIds(nextClearedIds);
   }, [userId]);
 
   useEffect(() => {
@@ -364,6 +372,14 @@ export function useNotifications(userId: string | null): UseNotificationsResult 
 
     window.localStorage.setItem(getSnoozeStorageKey(userId), JSON.stringify(snoozedUntilById));
   }, [userId, snoozedUntilById]);
+
+  useEffect(() => {
+    if (!userId) {
+      return;
+    }
+
+    window.localStorage.setItem(getClearedStorageKey(userId), JSON.stringify(Array.from(clearedIds)));
+  }, [userId, clearedIds]);
 
   const refresh = useCallback(async () => {
     if (!userId) {
@@ -429,6 +445,10 @@ export function useNotifications(userId: string | null): UseNotificationsResult 
   const activeNotifications = useMemo(() => {
     const nowMs = Date.now();
     const nextActive = notifications.filter((notification) => {
+      if (clearedIds.has(notification.id)) {
+        return false;
+      }
+
       const snoozedUntil = snoozedUntilById[notification.id];
       if (!snoozedUntil) {
         return true;
@@ -443,7 +463,7 @@ export function useNotifications(userId: string | null): UseNotificationsResult 
     });
 
     return nextActive;
-  }, [notifications, snoozedUntilById]);
+  }, [notifications, snoozedUntilById, clearedIds]);
 
   const unreadCount = useMemo(
     () => activeNotifications.filter((notification) => !readIds.has(notification.id)).length,
@@ -489,9 +509,16 @@ export function useNotifications(userId: string | null): UseNotificationsResult 
   }, []);
 
   const clearHistory = useCallback(() => {
-    setReadIds(new Set());
-    setSnoozedUntilById({});
-  }, []);
+    setClearedIds((current) => {
+      const next = new Set(current);
+      notifications.forEach((notification) => {
+        if (readIds.has(notification.id)) {
+          next.add(notification.id);
+        }
+      });
+      return next;
+    });
+  }, [notifications, readIds]);
 
   const isRead = useCallback((id: string) => readIds.has(id), [readIds]);
 
