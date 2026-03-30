@@ -477,6 +477,12 @@ if (existsSync(clientDistPath)) {
 
 await ensureDatabase();
 
-app.listen(port, () => {
-  console.log(`Health Hub API running on http://localhost:${port}`);
-});
+const isVercelServerlessRuntime = process.env.VERCEL === "1";
+
+if (!isVercelServerlessRuntime) {
+  app.listen(port, () => {
+    console.log(`Health Hub API running on http://localhost:${port}`);
+  });
+}
+
+export default app;

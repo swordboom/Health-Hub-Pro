@@ -13,7 +13,7 @@ It supports account auth, health profile onboarding, appointment and reminder tr
 - Test schedule creation and listing
 - Emergency card view based on saved profile data
 - Symptom analysis and medicine side-effect checks using Groq
-- Local JSON persistence for all backend data
+- External SQLite-compatible persistence (Turso/libSQL)
 
 ## Tech Stack
 
@@ -21,7 +21,7 @@ It supports account auth, health profile onboarding, appointment and reminder tr
 - Backend: Node.js, Express 5
 - AI: `groq-sdk`
 - Auth: Custom HMAC-signed token flow
-- Storage: File-based JSON database (`server/data/db.json`)
+- Storage: External SQLite via Turso (`@libsql/client`)
 - Testing: Vitest
 
 ## Current Project Structure
@@ -29,6 +29,8 @@ It supports account auth, health profile onboarding, appointment and reminder tr
 ```text
 Health-Hub-Pro/
 |-- public/
+|-- api/
+|   `-- index.js
 |-- scripts/
 |   `-- dev.mjs
 |-- server/
@@ -56,6 +58,7 @@ Health-Hub-Pro/
 |   `-- App.tsx
 |-- .env.example
 |-- package.json
+|-- vercel.json
 |-- vite.config.ts
 `-- README.md
 ```
@@ -92,23 +95,44 @@ Copy-Item .env.example .env
 ```env
 PORT=3001
 JWT_SECRET=replace-this-with-a-long-random-string
-DATA_FILE=server/data/db.json
 VITE_API_BASE_URL=/api
 GROQ_API_KEY=your-groq-api-key
 GROQ_MODEL=openai/gpt-oss-120b
+TURSO_DATABASE_URL=libsql://your-database-name-your-org.turso.io
+TURSO_AUTH_TOKEN=your-turso-auth-token
+# Optional one-time migration source on first run:
+# DATA_FILE=server/data/db.json
 ```
 
 ### Variable Details
 
 - `PORT`: Express API port. Default `3001`.
 - `JWT_SECRET`: Required. Must be a strong random secret, at least 32 chars. The server exits if this is missing/weak/placeholder.
-- `DATA_FILE`: JSON database path for backend persistence.
 - `VITE_API_BASE_URL`: Frontend API base URL. `/api` works with local Vite proxy.
 - `GROQ_API_KEY`: Required for symptom and side-effect endpoints.
 - `GROQ_MODEL`: Optional model name, defaults to `openai/gpt-oss-120b`.
+- `TURSO_DATABASE_URL`: Required in Vercel. Your external SQLite/libSQL database URL.
+- `TURSO_AUTH_TOKEN`: Required for secured Turso databases.
+- `DATA_FILE`: Optional. Legacy `db.json` path used only for one-time migration seed when `app_state` is first created.
 
 Compatibility note:
 - Backend also accepts legacy `GROK_API_KEY` and `GROK_MODEL` if present.
+
+## Vercel Deployment
+
+This project is configured for Vercel serverless APIs:
+
+- `/api/*` routes are handled by [api/index.js](api/index.js), which wraps the Express app.
+- Vercel routing/build behavior is defined in `vercel.json`.
+- `app.listen(...)` is disabled automatically in Vercel runtime.
+
+Required Vercel environment variables:
+
+- `JWT_SECRET`
+- `GROQ_API_KEY`
+- `GROQ_MODEL` (optional)
+- `TURSO_DATABASE_URL`
+- `TURSO_AUTH_TOKEN`
 
 ## Run
 
@@ -182,8 +206,10 @@ Protected (require `Authorization: Bearer <token>`):
 
 ## Data Storage
 
-Backend data is stored in a JSON document at `DATA_FILE` (default `server/data/db.json`).
-The database is auto-created on first startup and includes:
+Backend data is stored in SQLite (libSQL protocol) using a single `app_state` table in your external Turso database.
+The app keeps its current JSON-shaped state in that row and persists updates transactionally with revision checks.
+
+The stored state includes:
 
 - `users`
 - `healthProfiles`
@@ -192,7 +218,9 @@ The database is auto-created on first startup and includes:
 - `testSchedules`
 - `symptomChecks`
 
-`server/data/db.json` is gitignored by default.
+Migration behavior:
+- On first run, if `app_state` does not exist yet, the backend will try to seed from legacy `DATA_FILE` (`server/data/db.json`) if available.
+- If no legacy file exists, it starts with an empty default state.
 
 ## Notes for Contributors
 
