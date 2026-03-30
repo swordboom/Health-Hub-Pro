@@ -103,6 +103,12 @@ function listTestSchedules(database, userId) {
     .sort((left, right) => new Date(left.scheduledDate).getTime() - new Date(right.scheduledDate).getTime());
 }
 
+function listSymptomChecks(database, userId) {
+  return database.symptomChecks
+    .filter((symptomCheck) => symptomCheck.userId === userId)
+    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime());
+}
+
 app.use(express.json({ limit: "1mb" }));
 app.use((request, response, next) => {
   const origin = request.headers.origin;
@@ -412,6 +418,15 @@ app.post(
     });
 
     response.status(201).json({ testSchedule });
+  }),
+);
+
+app.get(
+  "/api/symptom-checks",
+  requireAuth,
+  asyncHandler(async (request, response) => {
+    const database = await readDatabase();
+    response.json({ symptomChecks: listSymptomChecks(database, request.auth.sub).slice(0, 20) });
   }),
 );
 

@@ -97,6 +97,17 @@ export interface SideEffectResult {
   disclaimer: string;
 }
 
+export interface SymptomCheck {
+  id: string;
+  userId: string;
+  symptoms: string[];
+  detectedDisease: string | null;
+  suggestedMedicines: string[];
+  suggestedDoctorType: string;
+  aiResponse: SymptomResult;
+  createdAt: string;
+}
+
 class ApiError extends Error {
   status: number;
   details: unknown;
@@ -281,6 +292,11 @@ export const api = {
         method: "POST",
         body: JSON.stringify({ medicineName }),
       });
+    },
+  },
+  symptomChecks: {
+    list() {
+      return request<{ symptomChecks: SymptomCheck[] }>("/symptom-checks");
     },
   },
 };
