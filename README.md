@@ -13,14 +13,14 @@ This version uses a custom Node.js + Express backend with local file-based persi
 - Medicine reminder tracking
 - Test scheduling
 - Emergency card with allergies, chronic conditions, and emergency contact details
-- Grok-powered symptom analysis and medicine side-effect lookup
+- Groq-powered symptom analysis and medicine side-effect lookup
 - Responsive UI built with React, shadcn/ui, and Tailwind CSS
 
 ## Tech Stack
 
 - Frontend: React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui
 - Backend: Node.js, Express.js
-- AI Inference: xAI Grok API (server-side via SDK client)
+- AI Inference: Groq API (server-side via SDK client)
 - Authentication: Custom signed token flow
 - Persistence: Local JSON file database
 - Testing: Vitest
@@ -37,7 +37,7 @@ health-hub-pro/
 |   |-- lib/
 |   |   |-- auth.js
 |   |   |-- database.js
-|   |   |-- grok.js
+|   |   |-- groq.js
 |   |   `-- symptomEngine.js
 |   `-- index.js
 |-- src/
@@ -75,19 +75,18 @@ PORT=3001
 JWT_SECRET=replace-this-with-a-long-random-string
 DATA_FILE=server/data/db.json
 VITE_API_BASE_URL=/api
-GROK_API_KEY=your-grok-api-key
-GROK_MODEL=grok-3-mini
-GROK_API_BASE=https://api.x.ai/v1
+GROQ_API_KEY=your-groq-api-key
+GROQ_MODEL=openai/gpt-oss-120b
 ```
 
 Notes:
 
-- `JWT_SECRET` should be changed before deployment.
+- `JWT_SECRET` is required and must be a strong random value (minimum 32 characters). The server will refuse to start if it is missing, too short, or left as the placeholder.
 - `DATA_FILE` is the local JSON database path used by the backend.
 - `VITE_API_BASE_URL=/api` works with the Vite proxy during development.
-- `GROK_API_KEY` is required for the symptom analysis and side-effect endpoints.
-- `GROK_MODEL` is optional and defaults to `grok-3-mini`.
-- `GROK_API_BASE` is optional and defaults to `https://api.x.ai/v1`.
+- `GROQ_API_KEY` is required for the symptom analysis and side-effect endpoints.
+- `GROQ_MODEL` is optional and defaults to `openai/gpt-oss-120b`.
+- For compatibility, the server also accepts legacy `GROK_API_KEY` / `GROK_MODEL` names if present.
 
 ## Collaborator Setup
 

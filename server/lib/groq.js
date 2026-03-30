@@ -1,7 +1,6 @@
-import OpenAI from "openai";
+import { Groq } from "groq-sdk";
 
-const GROK_API_BASE = (process.env.GROK_API_BASE || "https://api.x.ai/v1").replace(/\/$/, "");
-const GROK_MODEL = (process.env.GROK_MODEL || "grok-3-mini").trim();
+const GROQ_MODEL = cleanText(process.env.GROQ_MODEL || process.env.GROK_MODEL || "openai/gpt-oss-120b");
 
 const PROBABILITIES = new Set(["high", "medium", "low"]);
 const URGENCY_LEVELS = new Set(["immediate", "soon", "routine"]);
@@ -12,12 +11,12 @@ const SYMPTOM_DISCLAIMER =
 const SIDE_EFFECT_DISCLAIMER =
   "Medicine information here is general and should not replace advice from your doctor or pharmacist. Use the official label and seek professional care for severe or unexpected reactions.";
 
-let cachedClient = null;
-let cachedClientKey = "";
-
 function cleanText(value) {
   return String(value ?? "").trim();
 }
+
+let cachedClient = null;
+let cachedClientKey = "";
 
 function cleanTextArray(value, limit = 5) {
   if (!Array.isArray(value)) {
@@ -69,7 +68,7 @@ function stripCodeFence(value) {
   return trimmed.replace(/^```(?:json)?\s*/i, "").replace(/```$/i, "").trim();
 }
 
-function parseGrokJson(text) {
+function parseGroqJson(text) {
   const stripped = stripCodeFence(text);
 
   try {
@@ -82,39 +81,37 @@ function parseGrokJson(text) {
       return JSON.parse(stripped.slice(firstBrace, lastBrace + 1));
     }
 
-    throw new Error("Grok returned a non-JSON response.");
+    throw new Error("Groq returned a non-JSON response.");
   }
 }
 
-function getGrokApiKey() {
-  const apiKey = cleanText(process.env.GROK_API_KEY);
+function getGroqApiKey() {
+  const apiKey = cleanText(process.env.GROQ_API_KEY || process.env.GROK_API_KEY);
   if (!apiKey) {
-    throw new Error("GROK_API_KEY is not configured on the server.");
+    throw new Error("GROQ_API_KEY is not configured on the server.");
   }
 
   return apiKey;
 }
 
-function getGrokClient() {
-  const apiKey = getGrokApiKey();
-  const nextClientKey = `${apiKey}|${GROK_API_BASE}`;
+function getGroqClient() {
+  const apiKey = getGroqApiKey();
 
-  if (!cachedClient || cachedClientKey !== nextClientKey) {
-    cachedClient = new OpenAI({
+  if (!cachedClient || cachedClientKey !== apiKey) {
+    cachedClient = new Groq({
       apiKey,
-      baseURL: GROK_API_BASE,
     });
-    cachedClientKey = nextClientKey;
+    cachedClientKey = apiKey;
   }
 
   return cachedClient;
 }
 
 async function generateStructuredResponse(prompt) {
-  const client = getGrokClient();
+  const client = getGroqClient();
 
   const completion = await client.chat.completions.create({
-    model: GROK_MODEL,
+    model: GROQ_MODEL,
     temperature: 0.2,
     messages: [
       {
@@ -131,10 +128,10 @@ async function generateStructuredResponse(prompt) {
   const text = cleanText(completion?.choices?.[0]?.message?.content);
 
   if (!text) {
-    throw new Error("Grok response was empty.");
+    throw new Error("Groq response was empty.");
   }
 
-  return parseGrokJson(text);
+  return parseGroqJson(text);
 }
 
 function buildSymptomsPrompt(symptoms) {
@@ -331,12 +328,12 @@ function normalizeSideEffectsResult(raw) {
   };
 }
 
-export async function analyzeSymptomsWithGrok(symptoms) {
+export async function analyzeSymptomsWithGroq(symptoms) {
   const raw = await generateStructuredResponse(buildSymptomsPrompt(symptoms));
   return normalizeSymptomsResult(raw);
 }
 
-export async function analyzeSideEffectsWithGrok(medicineName) {
+export async function analyzeSideEffectsWithGroq(medicineName) {
   const raw = await generateStructuredResponse(buildSideEffectsPrompt(medicineName));
   return normalizeSideEffectsResult(raw);
 }

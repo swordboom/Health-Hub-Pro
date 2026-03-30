@@ -1,7 +1,21 @@
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
 const TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 7;
-const TOKEN_SECRET = process.env.JWT_SECRET?.trim() || "healthhub-dev-secret";
+const JWT_SECRET_PLACEHOLDER = "replace-this-with-a-long-random-string";
+
+function getTokenSecret() {
+  const configuredSecret = String(process.env.JWT_SECRET ?? "").trim();
+
+  if (!configuredSecret || configuredSecret === JWT_SECRET_PLACEHOLDER || configuredSecret.length < 32) {
+    throw new Error(
+      "JWT_SECRET must be configured with a strong random value (at least 32 characters). Update your .env before starting the server.",
+    );
+  }
+
+  return configuredSecret;
+}
+
+const TOKEN_SECRET = getTokenSecret();
 
 function toBase64Url(value) {
   return Buffer.from(value).toString("base64url");
