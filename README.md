@@ -1,74 +1,36 @@
 # Health Hub Pro
 
-Health Hub Pro is a full-stack health management app with a React + Vite frontend and an Express backend.
-It supports account auth, health profile onboarding, appointment and reminder tracking, emergency info access, and AI-assisted symptom and side-effect guidance via Groq.
+Health Hub Pro is a full-stack health management app with a React + Vite frontend and an Express API backend.
+It includes account auth, profile onboarding, appointment and reminder tracking, emergency details, and AI-assisted symptom and medicine side-effect guidance.
 
-## What Is Implemented
+## Current Capabilities
 
 - Email/password signup and login with signed bearer tokens
-- Protected dashboard routes (`/dashboard`, `/connect`, `/symptoms`, `/emergency`, `/onboarding`)
-- Multi-step health profile onboarding and updates
-- Appointment creation and listing
-- Medicine reminder creation and listing
-- Test schedule creation and listing
-- Emergency card view based on saved profile data
-- Symptom analysis and medicine side-effect checks using Groq
-- External SQLite-compatible persistence (Turso/libSQL)
+- Protected app routes for dashboard, onboarding, connect, symptoms, and emergency
+- Multi-step onboarding flow with editable health profile data
+- Appointment management (create + list)
+- Medicine reminder management (create + list)
+- Test schedule management (create + list)
+- Emergency card view using saved profile data
+- Notification center (client-side) built from appointments, reminders, test schedules, profile completeness, and recent symptom checks
+- AI endpoints for symptom analysis and medicine side effects via Groq
+- libSQL storage with Turso support and local SQLite file fallback
 
 ## Tech Stack
 
-- Frontend: React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui
+- Frontend: React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui, React Router
 - Backend: Node.js, Express 5
-- AI: `groq-sdk`
-- Auth: Custom HMAC-signed token flow
-- Storage: External SQLite via Turso (`@libsql/client`)
-- Testing: Vitest
-
-## Current Project Structure
-
-```text
-Health-Hub-Pro/
-|-- public/
-|-- api/
-|   `-- index.js
-|-- scripts/
-|   `-- dev.mjs
-|-- server/
-|   |-- index.js
-|   `-- lib/
-|       |-- auth.js
-|       |-- database.js
-|       |-- groq.js
-|       `-- symptomEngine.js
-|-- src/
-|   |-- components/
-|   |-- contexts/
-|   |-- hooks/
-|   |-- lib/
-|   |   `-- api.ts
-|   |-- pages/
-|   |   |-- Index.tsx
-|   |   |-- Auth.tsx
-|   |   |-- Onboarding.tsx
-|   |   |-- Dashboard.tsx
-|   |   |-- Connect.tsx
-|   |   |-- Symptoms.tsx
-|   |   |-- Emergency.tsx
-|   |   `-- NotFound.tsx
-|   `-- App.tsx
-|-- .env.example
-|-- package.json
-|-- vercel.json
-|-- vite.config.ts
-`-- README.md
-```
+- AI integration: `groq-sdk`
+- Auth: custom HMAC-signed token flow
+- Data: `@libsql/client` (Turso/libSQL, with local file mode support)
+- Testing: Vitest + Testing Library setup
 
 ## Prerequisites
 
 - Node.js 20+
 - npm
 
-## Setup
+## Local Setup
 
 1. Install dependencies:
 
@@ -76,19 +38,37 @@ Health-Hub-Pro/
 npm install
 ```
 
-2. Copy environment file:
+2. Create your local environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-On Windows PowerShell:
+PowerShell:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-3. Update `.env` values, especially `JWT_SECRET` and `GROQ_API_KEY`.
+3. Update `.env` (at minimum set a strong `JWT_SECRET` and a valid `GROQ_API_KEY`).
+
+4. Start frontend and backend together:
+
+```bash
+npm run dev
+```
+
+Default local URLs:
+
+- Frontend: `http://localhost:8080`
+- Backend API: `http://localhost:3001`
+
+You can also run services separately:
+
+```bash
+npm run dev:server
+npm run dev:client
+```
 
 ## Environment Variables
 
@@ -106,81 +86,47 @@ TURSO_AUTH_TOKEN=your-turso-auth-token
 
 ### Variable Details
 
-- `PORT`: Express API port. Default `3001`.
-- `JWT_SECRET`: Required. Must be a strong random secret, at least 32 chars. The server exits if this is missing/weak/placeholder.
-- `VITE_API_BASE_URL`: Frontend API base URL. `/api` works with local Vite proxy.
-- `GROQ_API_KEY`: Required for symptom and side-effect endpoints.
-- `GROQ_MODEL`: Optional model name, defaults to `openai/gpt-oss-120b`.
-- `TURSO_DATABASE_URL`: Required in Vercel. Your external SQLite/libSQL database URL.
-- `TURSO_AUTH_TOKEN`: Required for secured Turso databases.
-- `DATA_FILE`: Optional. Legacy `db.json` path used only for one-time migration seed when `app_state` is first created.
+- `PORT`: Express API port (default `3001`)
+- `JWT_SECRET`: required, must be at least 32 characters and not the placeholder
+- `VITE_API_BASE_URL`: frontend API base URL (default `/api`)
+- `GROQ_API_KEY`: required for `/api/symptoms/analyze` and `/api/symptoms/side-effects`
+- `GROQ_MODEL`: optional model name (default `openai/gpt-oss-120b`)
+- `TURSO_DATABASE_URL`: optional locally, required on Vercel (or use `DATABASE_URL`)
+- `TURSO_AUTH_TOKEN`: auth token for secured Turso DBs (or use `DATABASE_AUTH_TOKEN`)
+- `DATA_FILE`: optional legacy JSON seed path used only for first-time state initialization
 
-Compatibility note:
-- Backend also accepts legacy `GROK_API_KEY` and `GROK_MODEL` if present.
+Compatibility aliases supported by backend:
 
-## Vercel Deployment
+- `GROK_API_KEY` and `GROK_MODEL` (legacy names)
+- `DATABASE_URL` and `DATABASE_AUTH_TOKEN` (libSQL aliases)
 
-This project is configured for Vercel serverless APIs:
+## Data Persistence
 
-- `/api/*` routes are handled by [api/index.js](api/index.js), which wraps the Express app.
-- Vercel routing/build behavior is defined in `vercel.json`.
-- `app.listen(...)` is disabled automatically in Vercel runtime.
+The backend stores app state in a single `app_state` table (`id=1`, JSON payload + revision).
 
-Required Vercel environment variables:
+- If `TURSO_DATABASE_URL`/`DATABASE_URL` is set, that libSQL endpoint is used.
+- If no DB URL is set locally, it falls back to `file:./server/data/healthhub.db`.
+- On first run, if `app_state` does not exist, the server tries seeding from `DATA_FILE` (default `server/data/db.json`).
 
-- `JWT_SECRET`
-- `GROQ_API_KEY`
-- `GROQ_MODEL` (optional)
-- `TURSO_DATABASE_URL`
-- `TURSO_AUTH_TOKEN`
+Stored collections in state:
 
-## Run
-
-Start frontend and backend together:
-
-```bash
-npm run dev
-```
-
-Starts:
-- Frontend: `http://localhost:8080`
-- Backend: `http://localhost:3001`
-
-Run services separately:
-
-```bash
-npm run dev:client
-npm run dev:server
-```
-
-Production backend start:
-
-```bash
-npm run build
-npm run start
-```
-
-## Scripts
-
-- `npm run dev`: Runs backend and frontend together (`scripts/dev.mjs`)
-- `npm run dev:client`: Runs Vite dev server
-- `npm run dev:server`: Runs Express server with `--watch`
-- `npm run build`: Builds frontend to `dist/`
-- `npm run build:dev`: Dev-mode Vite build
-- `npm run preview`: Preview built frontend
-- `npm run start`: Start backend using `.env`
-- `npm run lint`: Run ESLint
-- `npm run test`: Run Vitest tests
-- `npm run test:watch`: Run Vitest in watch mode
+- `users`
+- `healthProfiles`
+- `appointments`
+- `medicineReminders`
+- `testSchedules`
+- `symptomChecks`
 
 ## API Routes
 
 Public:
+
 - `GET /api/health`
 - `POST /api/auth/signup`
 - `POST /api/auth/login`
 
-Protected (require `Authorization: Bearer <token>`):
+Protected (`Authorization: Bearer <token>`):
+
 - `GET /api/auth/me`
 - `GET /api/profile`
 - `POST /api/profile`
@@ -191,48 +137,93 @@ Protected (require `Authorization: Bearer <token>`):
 - `POST /api/medicine-reminders`
 - `GET /api/test-schedules`
 - `POST /api/test-schedules`
+- `GET /api/symptom-checks`
 - `POST /api/symptoms/analyze`
 - `POST /api/symptoms/side-effects`
 
-## Frontend Routing
+## Frontend Routes
 
-- `/`: Landing page
-- `/auth`: Sign in / sign up
-- `/onboarding`: Profile setup (protected)
-- `/dashboard`: Main health dashboard (protected)
-- `/connect`: Doctors, hospitals, appointments, reminders, tests (protected)
-- `/symptoms`: Symptom and side-effect tools (protected)
-- `/emergency`: Emergency panel and emergency card (protected)
+- `/` landing page
+- `/auth` sign in / sign up
+- `/onboarding` profile setup (protected)
+- `/dashboard` overview (protected)
+- `/connect` doctors, hospitals, appointments, reminders, tests (protected)
+- `/symptoms` symptom + side-effect tools (protected)
+- `/emergency` emergency panel + emergency card (protected)
 
-## Data Storage
+## Vercel Deployment
 
-Backend data is stored in SQLite (libSQL protocol) using a single `app_state` table in your external Turso database.
-The app keeps its current JSON-shaped state in that row and persists updates transactionally with revision checks.
+The repository is configured for Vercel static frontend + serverless API:
 
-The stored state includes:
+- Frontend build output: `dist/`
+- API entrypoint: `api/index.js` (wraps Express app from `server/index.js`)
+- Routing behavior defined in `vercel.json`
 
-- `users`
-- `healthProfiles`
-- `appointments`
-- `medicineReminders`
-- `testSchedules`
-- `symptomChecks`
+When running in Vercel (`VERCEL=1`), the backend expects a configured libSQL URL and does not call `app.listen(...)`.
 
-Migration behavior:
-- On first run, if `app_state` does not exist yet, the backend will try to seed from legacy `DATA_FILE` (`server/data/db.json`) if available.
-- If no legacy file exists, it starts with an empty default state.
+Recommended Vercel environment variables:
 
-## Notes for Contributors
+- `JWT_SECRET`
+- `GROQ_API_KEY`
+- `GROQ_MODEL` (optional)
+- `TURSO_DATABASE_URL` (or `DATABASE_URL`)
+- `TURSO_AUTH_TOKEN` (or `DATABASE_AUTH_TOKEN`)
 
-- This project does not use Supabase.
+## Scripts
+
+- `npm run dev`: start backend and frontend in parallel (`scripts/dev.mjs`)
+- `npm run dev:server`: run Express API with `node --watch`
+- `npm run dev:client`: run Vite dev server
+- `npm run build`: production frontend build
+- `npm run build:dev`: development-mode frontend build
+- `npm run preview`: preview frontend build
+- `npm run start`: start backend with `.env`
+- `npm run lint`: run ESLint
+- `npm run test`: run Vitest once
+- `npm run test:watch`: run Vitest in watch mode
+
+## Project Structure
+
+```text
+Health-Hub-Pro/
+|-- api/
+|   `-- index.js
+|-- public/
+|-- scripts/
+|   `-- dev.mjs
+|-- server/
+|   |-- data/
+|   |   `-- db.json
+|   |-- lib/
+|   |   |-- auth.js
+|   |   |-- database.js
+|   |   |-- groq.js
+|   |   `-- symptomEngine.js
+|   `-- index.js
+|-- src/
+|   |-- components/
+|   |-- contexts/
+|   |-- hooks/
+|   |-- lib/
+|   |-- pages/
+|   `-- test/
+|-- .env.example
+|-- package.json
+|-- vercel.json
+|-- vite.config.ts
+`-- README.md
+```
+
+## Notes
+
 - Keep `.env` local and never commit real secrets.
-- Keep `package-lock.json` committed when dependencies change.
-- `server/lib/symptomEngine.js` exists as local rule-based logic but current API flow uses `server/lib/groq.js`.
+- `server/lib/symptomEngine.js` exists as a local rule-based engine, but current API routes use `server/lib/groq.js`.
+- This project does not use Supabase.
 
-## Testing and Verification
+## Testing
 
-- `npm run test` runs Vitest (currently includes a basic example test scaffold).
-- `npm run build` verifies frontend production build output.
+- `npm run test` runs the current Vitest suite (includes a basic scaffold test).
+- `npm run build` validates a production frontend build.
 
 ## License
 
