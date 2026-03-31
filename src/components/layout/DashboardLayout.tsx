@@ -336,6 +336,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </div>
     </div>
   );
-};
+} ;
 
 export default DashboardLayout;
