@@ -124,7 +124,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     <div className="min-h-screen bg-background flex">
       {/* Mobile Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -145,9 +145,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 </div>
                 <span className="text-xl font-display font-bold text-sidebar-foreground">HealthHub</span>
               </Link>
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="lg:hidden"
                 onClick={() => setSidebarOpen(false)}
               >
@@ -190,9 +190,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 <p className="text-xs text-muted-foreground">Patient</p>
               </div>
             </div>
-            <Button 
-              variant="outline" 
-              className="w-full justify-start" 
+            <Button
+              variant="outline"
+              className="w-full justify-start"
               onClick={handleSignOut}
             >
               <LogOut className="h-4 w-4 mr-2" />
@@ -207,9 +207,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         {/* Top Bar */}
         <header className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="lg:hidden"
               onClick={() => setSidebarOpen(true)}
             >
@@ -336,6 +336,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </div>
     </div>
   );
-} ;
+};
 
 export default DashboardLayout;
