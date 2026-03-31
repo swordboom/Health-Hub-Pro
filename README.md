@@ -12,6 +12,8 @@ It includes account auth, profile onboarding, appointment and reminder tracking,
 - Medicine reminder management (create + list)
 - Test schedule management (create + list)
 - Emergency card view using saved profile data
+- Dashboard shortcut to quickly edit personal info via onboarding
+- One-tap call actions for hospitals, emergency services, and emergency contacts
 - Notification center (client-side) built from appointments, reminders, test schedules, profile completeness, and recent symptom checks
 - AI endpoints for symptom analysis and medicine side effects via Groq
 - libSQL storage with Turso support and local SQLite file fallback
@@ -145,7 +147,7 @@ Protected (`Authorization: Bearer <token>`):
 
 - `/` landing page
 - `/auth` sign in / sign up
-- `/onboarding` profile setup (protected)
+- `/onboarding` profile setup and personal-info editing (protected)
 - `/dashboard` overview (protected)
 - `/connect` doctors, hospitals, appointments, reminders, tests (protected)
 - `/symptoms` symptom + side-effect tools (protected)
