@@ -13,7 +13,10 @@ import {
   CheckCircle2,
   Clock3,
   Users,
-  Lock
+  Lock,
+  ClipboardList,
+  Sparkles,
+  BellRing
 } from 'lucide-react';
 
 const features = [
@@ -54,6 +57,24 @@ const trustMetrics = [
     icon: Lock,
     value: '256-bit',
     label: 'Data encryption',
+  },
+];
+
+const onboardingSteps = [
+  {
+    icon: ClipboardList,
+    title: 'Create your profile',
+    description: 'Add your medical details once to get smarter recommendations across the app.',
+  },
+  {
+    icon: Sparkles,
+    title: 'Get AI health insights',
+    description: 'Describe symptoms and receive quick, easy-to-understand guidance in seconds.',
+  },
+  {
+    icon: BellRing,
+    title: 'Stay on track daily',
+    description: 'Use reminders and appointments to build healthy routines that actually stick.',
   },
 ];
 
@@ -164,6 +185,36 @@ const Index: React.FC = () => {
         </div>
       </section>
 
+      {/* How It Works */}
+      <section className="py-20 lg:py-28">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-14">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-3">How it works</p>
+            <h2 className="text-3xl lg:text-4xl font-display font-bold text-foreground mb-4">
+              Three Steps To Better Care
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Start fast, stay informed, and keep your healthcare journey organized in one simple flow.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {onboardingSteps.map((step, i) => (
+              <div key={step.title} className="relative rounded-2xl border border-border bg-card p-6 shadow-sm">
+                <div className="mb-5 flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <step.icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <span className="text-sm font-semibold text-primary/80">0{i + 1}</span>
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">{step.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Benefits Section */}
       <section className="py-20 lg:py-32">
         <div className="container mx-auto px-6">
@@ -204,22 +255,25 @@ const Index: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary to-primary/80">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-3xl lg:text-4xl font-display font-bold text-primary-foreground mb-4">
-            Start Your Health Journey Today
-          </h2>
-          <p className="text-primary-foreground/80 text-lg mb-8 max-w-2xl mx-auto">
-            Join thousands of users who are taking control of their health with HealthHub
-          </p>
-          <Button 
-            size="xl" 
-            variant="secondary"
-            onClick={() => navigate('/auth')}
-          >
-            Create Free Account
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
+      <section className="py-20 bg-gradient-to-r from-primary to-primary/80 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_20%_20%,white_0,transparent_45%),radial-gradient(circle_at_80%_10%,white_0,transparent_40%)]" />
+        <div className="container mx-auto px-6 text-center relative z-10">
+          <div className="max-w-3xl mx-auto rounded-3xl border border-primary-foreground/20 bg-primary-foreground/10 backdrop-blur-sm px-6 py-10 lg:px-10 lg:py-12">
+            <h2 className="text-3xl lg:text-4xl font-display font-bold text-primary-foreground mb-4">
+              Start Your Health Journey Today
+            </h2>
+            <p className="text-primary-foreground/90 text-lg mb-8 max-w-2xl mx-auto">
+              Join thousands of users who are taking control of their health with HealthHub
+            </p>
+            <Button 
+              size="xl" 
+              variant="secondary"
+              onClick={() => navigate('/auth')}
+            >
+              Create Free Account
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </section>
 
