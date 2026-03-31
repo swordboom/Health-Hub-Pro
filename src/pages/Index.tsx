@@ -10,7 +10,10 @@ import {
   Pill,
   Calendar,
   ArrowRight,
-  CheckCircle2
+  CheckCircle2,
+  Clock3,
+  Users,
+  Lock
 } from 'lucide-react';
 
 const features = [
@@ -33,6 +36,24 @@ const features = [
     icon: Pill,
     title: 'Medicine Reminders',
     description: 'Never miss a dose with smart medication tracking',
+  },
+];
+
+const trustMetrics = [
+  {
+    icon: Users,
+    value: '50K+',
+    label: 'Active users',
+  },
+  {
+    icon: Clock3,
+    value: '< 30 sec',
+    label: 'Symptom response time',
+  },
+  {
+    icon: Lock,
+    value: '256-bit',
+    label: 'Data encryption',
   },
 ];
 
@@ -89,6 +110,18 @@ const Index: React.FC = () => {
                 Sign In
               </Button>
             </div>
+            <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+              {trustMetrics.map((metric) => (
+                <div key={metric.label} className="rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm p-4">
+                  <div className="flex items-center gap-2 text-primary mb-2">
+                    <metric.icon className="h-4 w-4" />
+                    <span className="text-xs font-medium uppercase tracking-wide">Trusted platform</span>
+                  </div>
+                  <p className="text-xl font-semibold text-foreground leading-none">{metric.value}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{metric.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -112,14 +145,19 @@ const Index: React.FC = () => {
             {features.map((feature, i) => (
               <div 
                 key={i} 
-                className="health-card group cursor-pointer"
+                className="health-card group cursor-pointer relative overflow-hidden"
                 style={{ animationDelay: `${i * 100}ms` }}
               >
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/60 to-primary" />
                 <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                   <feature.icon className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
                 <p className="text-muted-foreground text-sm">{feature.description}</p>
+                <div className="mt-5 flex items-center text-sm text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                  Explore
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </div>
               </div>
             ))}
           </div>
