@@ -19,6 +19,7 @@ const Onboarding: React.FC = () => {
   const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasExistingProfile, setHasExistingProfile] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     dateOfBirth: "",
@@ -50,6 +51,7 @@ const Onboarding: React.FC = () => {
         }
 
         if (response.profile) {
+          setHasExistingProfile(true);
           setFormData({
             fullName: response.profile.fullName || user.fullName,
             dateOfBirth: response.profile.dateOfBirth || "",
@@ -65,6 +67,7 @@ const Onboarding: React.FC = () => {
           return;
         }
 
+        setHasExistingProfile(false);
         setFormData((current) => ({
           ...current,
           fullName: current.fullName || user.fullName,
@@ -122,10 +125,10 @@ const Onboarding: React.FC = () => {
           .filter(Boolean),
       });
 
-      toast.success("Health profile created successfully!");
+      toast.success(hasExistingProfile ? "Health profile updated successfully!" : "Health profile created successfully!");
       navigate("/dashboard");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to create health profile");
+      toast.error(error instanceof Error ? error.message : "Failed to save health profile");
     } finally {
       setIsLoading(false);
     }
@@ -145,6 +148,9 @@ const Onboarding: React.FC = () => {
           <p className="text-sm text-muted-foreground text-center">
             Step {step} of {totalSteps}
           </p>
+          {hasExistingProfile && (
+            <p className="text-xs text-muted-foreground text-center mt-1">Editing your existing health profile</p>
+          )}
         </div>
 
         <Card className="border-none shadow-xl animate-fade-in">
@@ -320,7 +326,7 @@ const Onboarding: React.FC = () => {
                   <Button className="flex-1" size="lg" onClick={handleSubmit} disabled={isLoading}>
                     {isLoading ? "Saving..." : (
                       <>
-                        Complete <CheckCircle2 className="ml-2 h-4 w-4" />
+                        {hasExistingProfile ? "Save Changes" : "Complete"} <CheckCircle2 className="ml-2 h-4 w-4" />
                       </>
                     )}
                   </Button>

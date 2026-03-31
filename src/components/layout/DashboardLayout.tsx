@@ -33,6 +33,7 @@ const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: Stethoscope, label: 'Connect', path: '/connect' },
   { icon: Search, label: 'Know Your Disease', path: '/symptoms' },
+  { icon: User, label: 'Personal Info', path: '/onboarding' },
   { icon: AlertTriangle, label: 'Emergency', path: '/emergency' },
 ];
 

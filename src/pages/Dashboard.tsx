@@ -17,6 +17,7 @@ import {
   ArrowRight,
   Clock,
   TestTube,
+  User,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -97,12 +98,20 @@ const Dashboard: React.FC = () => {
             </h1>
             <p className="text-muted-foreground mt-1">Here's your health overview for today</p>
           </div>
-          <Button variant="emergency" size="lg" asChild className="pulse-emergency">
-            <Link to="/emergency">
-              <AlertTriangle className="h-5 w-5 mr-2" />
-              Emergency
-            </Link>
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button variant="outline" size="lg" asChild>
+              <Link to="/onboarding">
+                <User className="h-5 w-5 mr-2" />
+                Edit Personal Info
+              </Link>
+            </Button>
+            <Button variant="emergency" size="lg" asChild className="pulse-emergency">
+              <Link to="/emergency">
+                <AlertTriangle className="h-5 w-5 mr-2" />
+                Emergency
+              </Link>
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

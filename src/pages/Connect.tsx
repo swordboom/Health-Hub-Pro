@@ -53,6 +53,10 @@ const doctors = [
   { name: "Dr. James Wilson", specialty: "Neurologist", rating: 4.6, available: "Wed-Sun" },
 ];
 
+function toDialableNumber(number: string) {
+  return number.replace(/[^+\d]/g, "");
+}
+
 const Connect: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("all");
@@ -322,8 +326,8 @@ const Connect: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    <Button variant="outline" className="w-full mt-4">
-                      Contact Hospital
+                    <Button variant="outline" className="w-full mt-4" asChild>
+                      <a href={`tel:${toDialableNumber(hospital.phone)}`}>Contact Hospital</a>
                     </Button>
                   </CardContent>
                 </Card>

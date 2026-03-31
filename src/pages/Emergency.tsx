@@ -25,6 +25,10 @@ const emergencyNumbers = [
   { name: "Hospital Helpline", number: "104", icon: Hospital, color: "bg-blue-500" },
 ];
 
+function toDialableNumber(number: string) {
+  return number.replace(/[^+\d]/g, "");
+}
+
 const Emergency: React.FC = () => {
   const [profile, setProfile] = useState<HealthProfile | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -51,7 +55,13 @@ const Emergency: React.FC = () => {
   }, []);
 
   const handleCall = (number: string) => {
-    window.location.href = `tel:${number}`;
+    const dialableNumber = toDialableNumber(number);
+    if (!dialableNumber) {
+      toast.error("Phone number is not available");
+      return;
+    }
+
+    window.location.assign(`tel:${dialableNumber}`);
   };
 
   const copyToClipboard = async (text: string, field: string) => {
@@ -97,7 +107,7 @@ const Emergency: React.FC = () => {
 
         <Card className="border-destructive/30 bg-destructive/5">
           <CardContent className="p-6">
-            <Button variant="emergency" size="xl" className="w-full text-lg" onClick={() => handleCall("911")}>
+            <Button variant="emergency" size="xl" className="w-full text-lg" onClick={() => handleCall("112")}>
               <Phone className="h-6 w-6 mr-3 animate-pulse" />
               Call Emergency (112)
             </Button>
