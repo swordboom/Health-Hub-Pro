@@ -3,7 +3,7 @@
 Health Hub Pro is a full-stack health management app with a React + Vite frontend and an Express API backend.
 It includes account auth, profile onboarding, appointment and reminder tracking, emergency details, and AI-assisted symptom and medicine side-effect guidance.
 
-## Current Capabilities
+## Current Capabilities 
 
 - Email/password signup and login with signed bearer tokens
 - Protected app routes for dashboard, onboarding, connect, symptoms, and emergency
