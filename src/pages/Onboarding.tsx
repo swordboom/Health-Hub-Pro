@@ -14,12 +14,42 @@ import { toast } from "sonner";
 const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const genders = ["Male", "Female", "Other", "Prefer not to say"];
 
+function formatDateInputValue(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function isDateOfBirthBeforeToday(value: string) {
+  if (!value) {
+    return true;
+  }
+
+  const birthDate = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(birthDate.getTime())) {
+    return false;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return birthDate.getTime() < today.getTime();
+}
+
+function getMaxDateOfBirth() {
+  const yesterday = new Date();
+  yesterday.setHours(0, 0, 0, 0);
+  yesterday.setDate(yesterday.getDate() - 1);
+  return formatDateInputValue(yesterday);
+}
+
 const Onboarding: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [hasExistingProfile, setHasExistingProfile] = useState(false);
+  const [dobError, setDobError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     fullName: "",
     dateOfBirth: "",
@@ -35,6 +65,7 @@ const Onboarding: React.FC = () => {
 
   const totalSteps = 3;
   const progress = (step / totalSteps) * 100;
+  const maxDateOfBirth = getMaxDateOfBirth();
 
   useEffect(() => {
     if (!user) {
@@ -51,10 +82,14 @@ const Onboarding: React.FC = () => {
         }
 
         if (response.profile) {
+          const savedDateOfBirth = response.profile.dateOfBirth || "";
+          const normalizedDateOfBirth = isDateOfBirthBeforeToday(savedDateOfBirth) ? savedDateOfBirth : "";
+
           setHasExistingProfile(true);
+          setDobError(savedDateOfBirth && !normalizedDateOfBirth ? "Date of birth must be before today." : null);
           setFormData({
             fullName: response.profile.fullName || user.fullName,
-            dateOfBirth: response.profile.dateOfBirth || "",
+            dateOfBirth: normalizedDateOfBirth,
             gender: response.profile.gender || "",
             bloodType: response.profile.bloodType || "",
             heightCm: response.profile.heightCm ? String(response.profile.heightCm) : "",
@@ -68,11 +103,13 @@ const Onboarding: React.FC = () => {
         }
 
         setHasExistingProfile(false);
+        setDobError(null);
         setFormData((current) => ({
           ...current,
           fullName: current.fullName || user.fullName,
         }));
       } catch {
+        setDobError(null);
         setFormData((current) => ({
           ...current,
           fullName: current.fullName || user.fullName,
@@ -91,7 +128,43 @@ const Onboarding: React.FC = () => {
     setFormData((previous) => ({ ...previous, [field]: value }));
   };
 
+  const validateDateOfBirth = (value: string) => {
+    if (!value) {
+      setDobError(null);
+      return true;
+    }
+
+    if (!isDateOfBirthBeforeToday(value)) {
+      setDobError("Date of birth must be before today.");
+      return false;
+    }
+
+    setDobError(null);
+    return true;
+  };
+
+  const handleDateOfBirthChange = (value: string) => {
+    if (validateDateOfBirth(value)) {
+      updateFormData("dateOfBirth", value);
+      return;
+    }
+
+    toast.error("Date of birth must be before today.");
+  };
+
   const handleNext = () => {
+    if (step === 1) {
+      if (!formData.fullName) {
+        toast.error("Full name is required.");
+        return;
+      }
+
+      if (!validateDateOfBirth(formData.dateOfBirth)) {
+        toast.error("Please enter a valid date of birth.");
+        return;
+      }
+    }
+
     if (step < totalSteps) {
       setStep(step + 1);
     }
@@ -107,6 +180,12 @@ const Onboarding: React.FC = () => {
     if (!user) {
       toast.error("Please sign in first");
       navigate("/auth");
+      return;
+    }
+
+    if (!validateDateOfBirth(formData.dateOfBirth)) {
+      setStep(1);
+      toast.error("Please fix your date of birth before saving.");
       return;
     }
 
@@ -180,8 +259,10 @@ const Onboarding: React.FC = () => {
                     id="dob"
                     type="date"
                     value={formData.dateOfBirth}
-                    onChange={(event) => updateFormData("dateOfBirth", event.target.value)}
+                    max={maxDateOfBirth}
+                    onChange={(event) => handleDateOfBirthChange(event.target.value)}
                   />
+                  {dobError ? <p className="text-sm text-destructive">{dobError}</p> : null}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="gender">Gender</Label>

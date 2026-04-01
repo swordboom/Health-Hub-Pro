@@ -32,6 +32,40 @@ function cleanOptionalText(value) {
   return normalized || null;
 }
 
+function normalizeDateOfBirth(value) {
+  const normalized = cleanOptionalText(value);
+  if (!normalized) {
+    return null;
+  }
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
+    throw new HttpError(400, "Date of birth must be a valid date in YYYY-MM-DD format.");
+  }
+
+  const birthDate = new Date(`${normalized}T00:00:00`);
+  if (Number.isNaN(birthDate.getTime())) {
+    throw new HttpError(400, "Date of birth must be a valid calendar date.");
+  }
+
+  const [year, month, day] = normalized.split("-").map((part) => Number(part));
+  if (
+    birthDate.getFullYear() !== year ||
+    birthDate.getMonth() + 1 !== month ||
+    birthDate.getDate() !== day
+  ) {
+    throw new HttpError(400, "Date of birth must be a valid calendar date.");
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (birthDate.getTime() >= today.getTime()) {
+    throw new HttpError(400, "Date of birth must be before today.");
+  }
+
+  return normalized;
+}
+
 function cleanEmail(value) {
   return cleanText(value).toLowerCase();
 }
@@ -240,7 +274,7 @@ app.post(
         id: existingProfile?.id || randomUUID(),
         userId: request.auth.sub,
         fullName,
-        dateOfBirth: cleanOptionalText(request.body.dateOfBirth),
+        dateOfBirth: normalizeDateOfBirth(request.body.dateOfBirth),
         gender: cleanOptionalText(request.body.gender),
         bloodType: cleanOptionalText(request.body.bloodType),
         heightCm: toNumberOrNull(request.body.heightCm),

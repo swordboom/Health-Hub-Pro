@@ -29,6 +29,27 @@ function toDialableNumber(number: string) {
   return number.replace(/[^+\d]/g, "");
 }
 
+function calculateAge(dateOfBirth: string | null) {
+  if (!dateOfBirth) {
+    return null;
+  }
+
+  const birthDate = new Date(`${dateOfBirth}T00:00:00`);
+  if (Number.isNaN(birthDate.getTime())) {
+    return null;
+  }
+
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDelta = today.getMonth() - birthDate.getMonth();
+
+  if (monthDelta < 0 || (monthDelta === 0 && today.getDate() < birthDate.getDate())) {
+    age -= 1;
+  }
+
+  return age > 0 ? age : null;
+}
+
 const Emergency: React.FC = () => {
   const [profile, setProfile] = useState<HealthProfile | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -74,6 +95,8 @@ const Emergency: React.FC = () => {
       toast.error("Failed to copy");
     }
   };
+
+  const age = calculateAge(profile?.dateOfBirth ?? null);
 
   return (
     <DashboardLayout>
@@ -151,11 +174,7 @@ const Emergency: React.FC = () => {
                         <Heart className="h-4 w-4 text-primary" />
                         <span className="text-sm text-muted-foreground">Age</span>
                       </div>
-                      <p className="font-bold text-2xl">
-                        {profile.dateOfBirth
-                          ? Math.floor((Date.now() - new Date(profile.dateOfBirth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
-                          : "N/A"}
-                      </p>
+                      <p className="font-bold text-2xl">{age ?? "N/A"}</p>
                     </div>
                   </div>
 

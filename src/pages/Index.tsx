@@ -11,9 +11,6 @@ import {
   Calendar,
   ArrowRight,
   CheckCircle2,
-  Clock3,
-  Users,
-  Lock,
   ClipboardList,
   Sparkles,
   BellRing
@@ -39,24 +36,6 @@ const features = [
     icon: Pill,
     title: 'Medicine Reminders',
     description: 'Never miss a dose with smart medication tracking',
-  },
-];
-
-const trustMetrics = [
-  {
-    icon: Users,
-    value: '50K+',
-    label: 'Active users',
-  },
-  {
-    icon: Clock3,
-    value: '< 30 sec',
-    label: 'Symptom response time',
-  },
-  {
-    icon: Lock,
-    value: '256-bit',
-    label: 'Data encryption',
   },
 ];
 
@@ -130,18 +109,6 @@ const Index: React.FC = () => {
               <Button size="xl" variant="outline" onClick={() => navigate('/auth')}>
                 Sign In
               </Button>
-            </div>
-            <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
-              {trustMetrics.map((metric) => (
-                <div key={metric.label} className="rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm p-4">
-                  <div className="flex items-center gap-2 text-primary mb-2">
-                    <metric.icon className="h-4 w-4" />
-                    <span className="text-xs font-medium uppercase tracking-wide">Trusted platform</span>
-                  </div>
-                  <p className="text-xl font-semibold text-foreground leading-none">{metric.value}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{metric.label}</p>
-                </div>
-              ))}
             </div>
           </div>
         </div>
